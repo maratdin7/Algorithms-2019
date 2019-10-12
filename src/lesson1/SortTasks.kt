@@ -2,6 +2,12 @@
 
 package lesson1
 
+import java.lang.IllegalArgumentException
+import java.lang.StringBuilder
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
+
 /**
  * Сортировка времён
  *
@@ -32,8 +38,80 @@ package lesson1
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
+
+//////////////////////////////////////
+// Временнная сложность O(N * logN) //
+// Сложность по памяти O(N * logN)  //
+//////////////////////////////////////
+
 fun sortTimes(inputName: String, outputName: String) {
-    TODO()
+    val input = Paths.get(inputName)
+    val output = Paths.get(outputName)
+    val list = mutableListOf<Int>()
+    val reader = Files.newBufferedReader(input)
+    reader.use {
+        var line = it.readLine()
+
+        while (line != null) {
+            val seconds = Times(line).toSeconds()
+            list.add(seconds)
+            line = it.readLine()
+        }
+
+    }
+    val intArray = list.toIntArray()
+
+    heapSort(intArray)
+
+    val writer = Files.newBufferedWriter(output)
+    writer.use {
+
+        for (i in intArray) {
+            it.write(Times.toTimes(i).times)
+            it.newLine()
+        }
+
+    }
+}
+
+class Times(val times: String) {
+
+    companion object ToTimes {
+        fun toTimes(seconds: Int): Times {
+            val secondsInMinute = 60
+            val secondsInHour = secondsInMinute * secondsInMinute
+            var times = StringBuilder("")
+            var hours = seconds / secondsInHour
+            val minutes = (seconds % secondsInHour) / secondsInMinute
+            val seconds1 = seconds - secondsInHour * hours - secondsInMinute * minutes
+            var pm = "AM"
+            if (hours >= 12) {
+                hours -= 12
+                pm = "PM"
+            }
+            if (hours == 0) hours += 12
+            times = times.append(hours.normalized(), ':', minutes.normalized(), ':', seconds1.normalized(), ' ', pm)
+            return Times(times.toString())
+        }
+
+        private fun Int.normalized(): String = if (this < 10) "0$this" else this.toString()
+    }
+
+    private fun isTimes() {
+        val regex = Regex("""((1[0-2])|(0\d)):(\d\d):(\d\d) ((AM)|(PM))""")
+        if (!times.matches(regex)) throw IllegalArgumentException()
+    }
+
+    fun toSeconds(): Int {
+        isTimes()
+        val secondsInMinute = 60
+        val secondsInHour = secondsInMinute * secondsInMinute
+        val list = times.split(':', ' ')
+        var seconds = list[1].toInt() * secondsInMinute + list[2].toInt()
+        if (list[0] != "12") seconds += list[0].toInt() * secondsInHour
+        if (list[3] == "PM") seconds += 12 * secondsInHour
+        return seconds
+    }
 }
 
 /**
@@ -97,7 +175,30 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 121.3
  */
 fun sortTemperatures(inputName: String, outputName: String) {
-    TODO()
+
+    val input = Paths.get(inputName)
+    val output = Paths.get(outputName)
+    val list = MutableList<StringBuilder?>(8000) { null }
+
+
+    val reader = Files.newBufferedReader(input)
+    reader.use {
+        var line = it.readLine()
+        while (line != null) {
+            val index = ((line.toDouble() * 10).toInt() + 2730)
+            if (list[index] == null) list[index] = StringBuilder("").append(line, '\n')
+            else list[index]!!.append(line, '\n')
+            line = it.readLine()
+        }
+    }
+    val writer = Files.newBufferedWriter(output)
+    writer.use {
+        for (i in list) {
+            if (i != null) {
+                it.write(i.toString())
+            }
+        }
+    }
 }
 
 /**
@@ -130,8 +231,45 @@ fun sortTemperatures(inputName: String, outputName: String) {
  * 2
  */
 fun sortSequence(inputName: String, outputName: String) {
-    TODO()
+    val input = Paths.get(inputName)
+    val output = Paths.get(outputName)
+    val map = mutableMapOf<Int, Int>()
+    val list = mutableListOf<Int>()
+    val reader = Files.newBufferedReader(input, StandardCharsets.UTF_8)
+    reader.use {
+        var line = it.readLine()
+        while (line != null) {
+            val num = line.toInt()
+            list.add(num)
+            map[num] = map.getOrDefault(num, 0) + 1
+            line = it.readLine()
+        }
+    }
+    var minPair = Pair(Int.MAX_VALUE, 0)
+
+    for ((key, value) in map) {
+        when {
+            value > minPair.second -> minPair = Pair(key, value)
+            value == minPair.second && key < minPair.first -> minPair = Pair(key, value)
+        }
+    }
+    val writer = Files.newBufferedWriter(output, StandardCharsets.UTF_8)
+    writer.use {
+        for (i in list) {
+            if (i != minPair.first) {
+                it.write(i.toString())
+                it.newLine()
+            }
+        }
+        var i = 0
+        while (i < minPair.second) {
+            it.write(minPair.first.toString())
+            it.newLine()
+            i++
+        }
+    }
 }
+
 
 /**
  * Соединить два отсортированных массива в один
