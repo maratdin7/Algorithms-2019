@@ -174,11 +174,17 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 99.5
  * 121.3
  */
+
+//////////////////////////////////////
+// Временнная сложность O(N)        //
+// Сложность по памяти O(1)         //
+//////////////////////////////////////
+
 fun sortTemperatures(inputName: String, outputName: String) {
 
     val input = Paths.get(inputName)
     val output = Paths.get(outputName)
-    val list = MutableList<StringBuilder?>(8000) { null }
+    val list = MutableList<Int?>(8000) { null }
 
 
     val reader = Files.newBufferedReader(input)
@@ -186,16 +192,20 @@ fun sortTemperatures(inputName: String, outputName: String) {
         var line = it.readLine()
         while (line != null) {
             val index = ((line.toDouble() * 10).toInt() + 2730)
-            if (list[index] == null) list[index] = StringBuilder("").append(line, '\n')
-            else list[index]!!.append(line, '\n')
+            if (list[index] == null) list[index] = 1
+            else list[index] = list[index]!! + 1
             line = it.readLine()
         }
     }
     val writer = Files.newBufferedWriter(output)
     writer.use {
-        for (i in list) {
-            if (i != null) {
-                it.write(i.toString())
+        for ((i, e) in list.withIndex()) {
+            if (e != null) {
+                val temp = ((i - 2730) / 10.0).toString()
+                for (j in 0 until e) {
+                    it.write(temp)
+                    it.newLine()
+                }
             }
         }
     }
@@ -230,6 +240,12 @@ fun sortTemperatures(inputName: String, outputName: String) {
  * 2
  * 2
  */
+
+//////////////////////////////////////
+// Временнная сложность O(N)        //
+// Сложность по памяти O(N)         //
+//////////////////////////////////////
+
 fun sortSequence(inputName: String, outputName: String) {
     val input = Paths.get(inputName)
     val output = Paths.get(outputName)

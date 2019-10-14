@@ -2,6 +2,11 @@
 
 package lesson2
 
+import com.sun.org.apache.xpath.internal.operations.Bool
+import lesson3.Trie
+import java.lang.StringBuilder
+import java.util.*
+
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
  * Простая
@@ -94,8 +99,31 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * Если имеется несколько самых длинных общих подстрок одной длины,
  * вернуть ту из них, которая встречается раньше в строке first.
  */
+
+//////////////////////////////////////
+// Временнная сложность O(N^2)      //
+// Сложность по памяти O(N^2)       //
+//////////////////////////////////////
+
 fun longestCommonSubstring(first: String, second: String): String {
-    TODO()
+    val matrix = Matrix(first.length, second.length, 0)
+    var maxSubStrInFirst = -1
+    var maxSubStr = 0
+    for ((i, charFirst) in first.withIndex()) {
+
+        for ((j, charSecond) in second.withIndex()) {
+
+            if (charFirst == charSecond) matrix[i, j] = matrix.getOrDefault(i - 1, j - 1) + 1
+            if (matrix[i, j] > maxSubStr) {
+                maxSubStr = matrix[i, j]
+                maxSubStrInFirst = i
+            }
+        }
+    }
+    return if (maxSubStrInFirst != -1) {
+        val startIndex = maxSubStrInFirst - maxSubStr + 1
+        first.substring(startIndex, maxSubStrInFirst + 1)
+    } else ""
 }
 
 /**
@@ -141,3 +169,4 @@ fun calcPrimesNumber(limit: Int): Int {
 fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
     TODO()
 }
+

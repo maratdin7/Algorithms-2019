@@ -2,6 +2,7 @@ package lesson2
 
 import org.junit.jupiter.api.Tag
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class AlgorithmsTestsKotlin : AbstractAlgorithmsTests() {
     @Test
@@ -20,7 +21,14 @@ class AlgorithmsTestsKotlin : AbstractAlgorithmsTests() {
     @Tag("Normal")
     fun testLongestCommonSubstring() {
         longestCommonSubstring { first, second -> longestCommonSubstring(first, second) }
+
+        assertEquals("werty", longestCommonSubstring("Ewerty", "Qwerty"))
+        assertEquals("y", longestCommonSubstring("y", "yfdsjfkldsjflk"))
+        assertEquals("", longestCommonSubstring("", ""))
+        assertEquals("haa", longestCommonSubstring("haah", "haaah"))
+        assertEquals("haa", longestCommonSubstring("haaah", "haahah"))
     }
+
 
     @Test
     @Tag("Easy")
