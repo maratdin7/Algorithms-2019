@@ -2,10 +2,7 @@
 
 package lesson2
 
-import com.sun.org.apache.xpath.internal.operations.Bool
-import lesson3.Trie
-import java.lang.StringBuilder
-import java.util.*
+import java.io.File
 
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
@@ -102,29 +99,36 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
 
 //////////////////////////////////////
 // Временнная сложность O(N^2)      //
-// Сложность по памяти O(N^2)       //
+// Сложность по памяти O(N)         //
 //////////////////////////////////////
 
 fun longestCommonSubstring(first: String, second: String): String {
-    val matrix = Matrix(first.length, second.length, 0)
+    val list = MutableList(second.length) { 0 }
     var maxSubStrInFirst = -1
     var maxSubStr = 0
+
     for ((i, charFirst) in first.withIndex()) {
+        var previous = 0
 
         for ((j, charSecond) in second.withIndex()) {
+            val temp = previous
+            previous = list[j]
 
-            if (charFirst == charSecond) matrix[i, j] = matrix.getOrDefault(i - 1, j - 1) + 1
-            if (matrix[i, j] > maxSubStr) {
-                maxSubStr = matrix[i, j]
+            if (charFirst == charSecond) list[j] = temp + 1 else list[j] = 0
+
+            if (list[j] > maxSubStr) {
+                maxSubStr = list[j]
                 maxSubStrInFirst = i
             }
         }
     }
+
     return if (maxSubStrInFirst != -1) {
         val startIndex = maxSubStrInFirst - maxSubStr + 1
         first.substring(startIndex, maxSubStrInFirst + 1)
     } else ""
 }
+
 
 /**
  * Число простых чисел в интервале
@@ -136,8 +140,26 @@ fun longestCommonSubstring(first: String, second: String): String {
  * Справка: простым считается число, которое делится нацело только на 1 и на себя.
  * Единица простым числом не считается.
  */
+
+//////////////////////////////////////
+// Временнная сложность O(N*sqrt(N))//
+// Сложность по памяти O(1)         //
+//////////////////////////////////////
+
 fun calcPrimesNumber(limit: Int): Int {
-    TODO()
+    var res = 1
+    for (i in 2..limit) res += isPrime(i)
+
+    return if (limit < 2) 0 else res
+}
+
+fun isPrime(n: Int): Int {
+    val sqrt = kotlin.math.sqrt(n.toDouble()).toInt()
+    if (n % 2 == 0) return 0
+    for (i in 1..sqrt step 2) {
+        if (n % i == 0 && i != 1) return 0
+    }
+    return 1
 }
 
 /**
@@ -166,7 +188,97 @@ fun calcPrimesNumber(limit: Int): Int {
  * В файле буквы разделены пробелами, строки -- переносами строк.
  * Остальные символы ни в файле, ни в словах не допускаются.
  */
+
+////////////////////////////////////
+// Временнная сложность O(M*N^2)  // когда длина слова или количество одинаковых букв в массиве N^2
+// Сложность по памяти O(N^2)     //
+// M = количество слов            //
+// N = размеры массива            //
+////////////////////////////////////
+
 fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
-    TODO()
+    val balda = Balda(inputName)
+    return balda.findWords(words)
 }
 
+class Balda(val inputName: String) {
+
+    private val matrix: MutableMatrixForBalda = MutableMatrixForBalda(File(inputName).readLines())
+
+    fun findWords(words: Set<String>): Set<String> {
+        val set = mutableSetOf<String>()
+        var id = 0
+        for (word in words) {
+            val list = matrix.map[word[0]] ?: continue
+            for (cell in list) {
+                if (findWord(word, 0, id, cell)) set.add(word)
+                id++
+            }
+        }
+        return set
+    }
+
+    private fun findWord(word: String, index: Int, number: Int, cell: Cell): Boolean {
+        if (word.length == index) return true
+
+        return if (matrix.isCorrectCoordinates(cell.row, cell.column)) {
+            val now = matrix[cell.row, cell.column]
+
+            if (now.char == word[index] && now.number != number) {
+                matrix[cell.row, cell.column].number = number
+                findWord(word, index + 1, number, cell.row to cell.column + 1) ||
+                        findWord(word, index + 1, number, cell.row to cell.column - 1) ||
+                        findWord(word, index + 1, number, cell.row + 1 to cell.column) ||
+                        findWord(word, index + 1, number, cell.row - 1 to cell.column)
+            } else false
+        } else false
+    }
+
+
+    private class MutableMatrixForBalda(input: List<String>) {
+        private val matrix: MutableList<MutableList<CharAndNumber>>
+
+        val map: MutableMap<Char, MutableList<Cell>>
+
+        private var height: Int
+
+        private var width: Int
+
+        init {
+            val matrix = mutableListOf<MutableList<CharAndNumber>>()
+            val map = mutableMapOf<Char, MutableList<Cell>>()
+            for ((i, line) in input.withIndex()) {
+                matrix.add(mutableListOf())
+                for (j in 0..line.length step 2) {
+                    val char = line[j]
+                    matrix[i].add(char to -1)
+                    map[char] = map.getOrDefault(char, mutableListOf())
+                    map[char]!!.add(i to j / 2)
+                }
+            }
+            this.matrix = matrix
+            this.height = matrix.size
+            width = if (height == 0) 0 else matrix[0].size
+            this.map = map
+        }
+
+        operator fun get(row: Int, column: Int): CharAndNumber = matrix[row][column]
+
+        operator fun set(row: Int, column: Int, element: CharAndNumber) {
+            matrix[row][column] = element
+        }
+
+        fun isCorrectCoordinates(row: Int, column: Int): Boolean =
+            row in 0 until height && column in 0 until width
+    }
+
+
+    companion object {
+        infix fun Char.to(number: Int): CharAndNumber = CharAndNumber(this, number)
+        data class CharAndNumber(val char: Char, var number: Int)
+
+
+        infix fun Int.to(number: Int): Cell = Cell(this, number)
+        data class Cell(var row: Int, var column: Int)
+    }
+}

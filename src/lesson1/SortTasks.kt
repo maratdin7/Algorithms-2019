@@ -2,11 +2,8 @@
 
 package lesson1
 
-import java.lang.IllegalArgumentException
-import java.lang.StringBuilder
+import java.io.File
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Paths
 
 /**
  * Сортировка времён
@@ -45,10 +42,8 @@ import java.nio.file.Paths
 //////////////////////////////////////
 
 fun sortTimes(inputName: String, outputName: String) {
-    val input = Paths.get(inputName)
-    val output = Paths.get(outputName)
     val list = mutableListOf<Int>()
-    val reader = Files.newBufferedReader(input)
+    val reader = File(inputName).bufferedReader()
     reader.use {
         var line = it.readLine()
 
@@ -63,7 +58,7 @@ fun sortTimes(inputName: String, outputName: String) {
 
     heapSort(intArray)
 
-    val writer = Files.newBufferedWriter(output)
+    val writer = File(outputName).bufferedWriter()
     writer.use {
 
         for (i in intArray) {
@@ -76,7 +71,7 @@ fun sortTimes(inputName: String, outputName: String) {
 
 class Times(val times: String) {
 
-    companion object ToTimes {
+    companion object {
         fun toTimes(seconds: Int): Times {
             val secondsInMinute = 60
             val secondsInHour = secondsInMinute * secondsInMinute
@@ -97,13 +92,12 @@ class Times(val times: String) {
         private fun Int.normalized(): String = if (this < 10) "0$this" else this.toString()
     }
 
-    private fun isTimes() {
+    init {
         val regex = Regex("""((1[0-2])|(0\d)):(\d\d):(\d\d) ((AM)|(PM))""")
         if (!times.matches(regex)) throw IllegalArgumentException()
     }
 
     fun toSeconds(): Int {
-        isTimes()
         val secondsInMinute = 60
         val secondsInHour = secondsInMinute * secondsInMinute
         val list = times.split(':', ' ')
@@ -181,13 +175,10 @@ fun sortAddresses(inputName: String, outputName: String) {
 //////////////////////////////////////
 
 fun sortTemperatures(inputName: String, outputName: String) {
-
-    val input = Paths.get(inputName)
-    val output = Paths.get(outputName)
     val list = MutableList<Int?>(8000) { null }
 
 
-    val reader = Files.newBufferedReader(input)
+    val reader = File(inputName).bufferedReader()
     reader.use {
         var line = it.readLine()
         while (line != null) {
@@ -197,7 +188,7 @@ fun sortTemperatures(inputName: String, outputName: String) {
             line = it.readLine()
         }
     }
-    val writer = Files.newBufferedWriter(output)
+    val writer = File(outputName).bufferedWriter()
     writer.use {
         for ((i, e) in list.withIndex()) {
             if (e != null) {
@@ -247,11 +238,9 @@ fun sortTemperatures(inputName: String, outputName: String) {
 //////////////////////////////////////
 
 fun sortSequence(inputName: String, outputName: String) {
-    val input = Paths.get(inputName)
-    val output = Paths.get(outputName)
     val map = mutableMapOf<Int, Int>()
     val list = mutableListOf<Int>()
-    val reader = Files.newBufferedReader(input, StandardCharsets.UTF_8)
+    val reader = File(inputName).bufferedReader(StandardCharsets.UTF_8)
     reader.use {
         var line = it.readLine()
         while (line != null) {
@@ -269,7 +258,7 @@ fun sortSequence(inputName: String, outputName: String) {
             value == minPair.second && key < minPair.first -> minPair = Pair(key, value)
         }
     }
-    val writer = Files.newBufferedWriter(output, StandardCharsets.UTF_8)
+    val writer = File(outputName).bufferedWriter(StandardCharsets.UTF_8)
     writer.use {
         for (i in list) {
             if (i != minPair.first) {
