@@ -1,6 +1,5 @@
 package lesson3;
 
-import kotlin.NotImplementedError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,16 +8,19 @@ import java.util.*;
 // Attention: comparable supported but comparator is not
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
-    private static class Node<T> {
+    protected static class Node<T> {
         final T value;
 
         Node<T> left = null;
 
         Node<T> right = null;
 
+        Node<T> parent = null;
+
         Node(T value) {
             this.value = value;
         }
+
     }
 
     private Node<T> root = null;
@@ -35,15 +37,14 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         Node<T> newNode = new Node<>(t);
         if (closest == null) {
             root = newNode;
-        }
-        else if (comparison < 0) {
+        } else if (comparison < 0) {
             assert closest.left == null;
             closest.left = newNode;
-        }
-        else {
+        } else {
             assert closest.right == null;
             closest.right = newNode;
         }
+        newNode.parent = closest;
         size++;
         return true;
     }
@@ -74,8 +75,32 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        T t = (T) o;
+        Node<T> remove = find(t);
+        if (!contains(o)) return false;
+
+        assert remove != null;
+        Node<T> newNode;
+        if (remove.left != null) {
+            newNode = last(remove.left);
+            remove(remove, newNode, newNode.left);
+        }
+        else if (remove.right != null) {
+            newNode = first(remove.right);
+            remove(remove, newNode, newNode.right);
+        }
+        else parentNode(remove, null);
+        size--;
+        return true;
+    }
+
+    private void remove(Node<T> remove, Node<T> newNode, Node<T> n) {
+        parentNode(newNode, n);
+        if (n!=null) n.parent = newNode.parent;
+        newNode.parent = remove.parent;
+        newNode.left = remove.left;
+        newNode.right = remove.right;
+        parentNode(remove, newNode);
     }
 
     @Override
@@ -95,12 +120,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         int comparison = value.compareTo(start.value);
         if (comparison == 0) {
             return start;
-        }
-        else if (comparison < 0) {
+        } else if (comparison < 0) {
             if (start.left == null) return start;
             return find(start.left, value);
-        }
-        else {
+        } else {
             if (start.right == null) return start;
             return find(start.right, value);
         }
@@ -108,9 +131,17 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
     public class BinaryTreeIterator implements Iterator<T> {
 
+        protected Node<T> current = root;
+
+        private Integer previous = 0;
+
+        Node<T> next;
+
+        private Stack<Node<T>> stack = new Stack<>();
+
         private BinaryTreeIterator() {
-            // Добавьте сюда инициализацию, если она необходима
         }
+
 
         /**
          * Проверка наличия следующего элемента
@@ -118,8 +149,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public boolean hasNext() {
-            // TODO
-            throw new NotImplementedError();
+            return !stack.empty() || current != null;
         }
 
         /**
@@ -128,8 +158,18 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            // TODO
-            throw new NotImplementedError();
+            while (hasNext()) {
+                if (current != null) {
+                    stack.push(current);
+                    current = current.left;
+                } else {
+                    next = stack.pop();
+                    current = next.right;
+                    previous++;
+                    return next.value;
+                }
+            }
+            throw new NoSuchElementException();
         }
 
         /**
@@ -138,9 +178,65 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            // TODO
-            throw new NotImplementedError();
+            Integer prev = previous - 1;
+            Node<T> remove = next;
+            Node<T> parent = remove.parent;
+            if (remove.left == null && remove.right == null) {
+                parentNode(remove, null);
+            } else if (remove.right != null) {
+
+                if (remove.left != null) {
+                    Node<T> first = first(remove.right);
+                    first.left = remove.left;
+                    remove.left.parent = first.left;
+                }
+                parentNode(remove, remove.right);
+                remove.right.parent = parent;
+            } else {
+                parentNode(remove, remove.left);
+                remove.left.parent = parent;
+            }
+
+            BinaryTreeIterator i = new BinaryTreeIterator();
+            while (i.hasNext() && prev > i.previous) {
+                i.next();
+
+            }
+            stack = i.stack;
+            current = i.current;
+            next = i.next;
+            previous = i.previous;
+            size--;
         }
+
+
+    }
+
+    private void parentNode(Node<T> remove, Node<T> val) {
+        Node<T> parent = remove.parent;
+        if (parent == null) root = val;
+        else {
+            if (parent.right != null && parent.right.value.compareTo(remove.value)==0) parent.right = val;
+            else parent.left = val;
+        }
+    }
+
+    private Node<T> first(Node<T> newRoot) {
+        if (newRoot == null) throw new NoSuchElementException();
+        Node<T> current = newRoot;
+        while (current.left != null) {
+            current = current.left;
+        }
+        return current;
+    }
+
+    private Node<T> last(Node<T> newRoot) {
+        if (newRoot == null) throw new NoSuchElementException();
+        Node<T> current = newRoot;
+        while (current.right != null) {
+            current = current.right;
+        }
+        return current;
     }
 
     @NotNull
@@ -168,8 +264,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
-        // TODO
-        throw new NotImplementedError();
+        return new SubSet<>(this, fromElement, toElement);
     }
 
     /**
@@ -179,8 +274,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        // TODO
-        throw new NotImplementedError();
+        return new SubSet<T>(this, null, toElement);
     }
 
     /**
@@ -190,27 +284,16 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
-        // TODO
-        throw new NotImplementedError();
+        return new SubSet<T>(this, fromElement, null);
     }
 
     @Override
     public T first() {
-        if (root == null) throw new NoSuchElementException();
-        Node<T> current = root;
-        while (current.left != null) {
-            current = current.left;
-        }
-        return current.value;
+        return first(root).value;
     }
 
     @Override
     public T last() {
-        if (root == null) throw new NoSuchElementException();
-        Node<T> current = root;
-        while (current.right != null) {
-            current = current.right;
-        }
-        return current.value;
+        return last(root).value;
     }
 }

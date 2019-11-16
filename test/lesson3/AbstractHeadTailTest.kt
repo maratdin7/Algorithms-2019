@@ -151,4 +151,17 @@ abstract class AbstractHeadTailTest {
         assertEquals(14, tree.size)
     }
 
+    protected fun subSetTestAddRemove() {
+        val random = Random()
+        var toElement: Int? = random.nextInt(randomTreeSize + 1) + 1
+        var fromElement: Int? = random.run { nextInt(toElement!!) } + 1
+        if (toElement == randomTreeSize + 1) toElement = null
+        if (fromElement == toElement) fromElement = null
+
+        val randomSubset = randomTree.subSet(fromElement, toElement)
+        val prev = randomSubset.size;
+        if (randomSubset.contains(13) && randomSubset.add(13)) randomSubset.remove(13)
+        assertEquals(prev, randomSubset.size)
+    }
+
 }

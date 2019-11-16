@@ -1,11 +1,9 @@
 package lesson3
 
 import org.junit.jupiter.api.Tag
-import kotlin.test.Test
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.NoSuchElementException
+import kotlin.test.*
 
 class BinaryTreeTest {
     private fun testAdd(create: () -> CheckableSortedSet<Int>) {
@@ -139,6 +137,24 @@ class BinaryTreeTest {
     @Tag("Normal")
     fun testIteratorJava() {
         testIterator { createJavaTree() }
+        val binaryTree = BinaryTree<Int>()
+        binaryTree.add(10)
+        binaryTree.add(20)
+        binaryTree.add(4)
+        binaryTree.add(10)
+        binaryTree.add(3)
+        binaryTree.add(15)
+        binaryTree.add(16)
+        binaryTree.add(6)
+        var last = Int.MIN_VALUE
+        val iterator = binaryTree.iterator()
+        var e: Int
+        for (i in 0 until binaryTree.size) {
+            assertTrue(iterator.hasNext())
+            e = iterator.next()
+            assertTrue(e > last)
+            last = e
+        }
     }
 
     private fun testIteratorRemove(create: () -> CheckableSortedSet<Int>) {
@@ -196,5 +212,37 @@ class BinaryTreeTest {
     @Tag("Hard")
     fun testIteratorRemoveJava() {
         testIteratorRemove { createJavaTree() }
+
+    }
+
+    @Test
+    fun testRemoveRoot() {
+        val tree = BinaryTree<Int>()
+        tree.add(1)
+        var i = tree.iterator()
+        i.next()
+        i.remove()
+        assertFailsWith<NoSuchElementException> { tree.iterator().next() }
+        tree.add(10)
+        tree.add(1)
+        i = tree.iterator()
+        i.next()
+        i.remove()
+        assertEquals(10, tree.iterator().next())
+        tree.add(5)
+        tree.add(11)
+        tree.add(4)
+        tree.add(7)
+        tree.add(6)
+        i = tree.iterator()
+        i.next()
+        i.next()
+        i.remove()
+        assertEquals(6, i.next())
+        i.next()
+        i.next()
+        i.remove()
+        assertFalse(tree.contains(10))
+
     }
 }
