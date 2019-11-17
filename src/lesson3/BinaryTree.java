@@ -94,7 +94,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
             newNode.parent = remove.parent;
 
-            if (remove.left==null || newNode.value.compareTo(remove.left.value) != 0) newNode.left = remove.left;
+            if (remove.left == null || newNode.value.compareTo(remove.left.value) != 0) newNode.left = remove.left;
 
             newNode.right = remove.right;
             parentNode(remove, newNode);
@@ -109,7 +109,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             newNode.parent = remove.parent;
             newNode.left = remove.left;
 
-            if (newNode.right==null || newNode.value.compareTo(remove.right.value) != 0) newNode.right = remove.right;
+            if (newNode.right == null || newNode.value.compareTo(remove.right.value) != 0) newNode.right = remove.right;
 
             parentNode(remove, newNode);
         } else parentNode(remove, null);
@@ -184,7 +184,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Средняя
          */
 //////////////////////////////////////
-// Временнная сложность O(1)        //
+// В обход всего дерева O(n)        // тк элементы в стеке получаются за O(1). Выполнение next() в худшем случаее O(n),
+//                                  //    но тогда получение всех оставшихся элементов O(1)
 // Сложность по памяти O(n)         //
 //////////////////////////////////////
         @Override
@@ -300,6 +301,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 // Временнная сложность равна сл-ти //
 // соответсвующих ф-ций BinaryTree  //
 // Кроме size() O(n)                //
+// Кроме обход всего SubSet O(n)    // тк просто обход дерева
 // Сложность по памяти O(n)         //
 //////////////////////////////////////
     @NotNull
