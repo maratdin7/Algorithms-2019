@@ -38,11 +38,6 @@ class JavaHeadSetTest : AbstractHeadTailTest() {
     }
 
     @Test
-    fun test() {
-
-    }
-
-    @Test
     @Tag("Impossible")
     fun subSetTest() {
         doSubSetTest()

@@ -25,6 +25,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
     private Node<T> root = null;
 
+    public Node<T> getRoot() {
+        return root;
+    }
+
     private int size = 0;
 
     @Override
@@ -83,20 +87,39 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         Node<T> newNode;
         if (remove.left != null) {
             newNode = last(remove.left);
-            remove(remove, newNode, newNode.left);
-        }
-        else if (remove.right != null) {
+
+            parentNode(newNode, newNode.left);
+
+            if (newNode.left != null) newNode.left.parent = newNode.parent;
+
+            newNode.parent = remove.parent;
+
+            if (remove.left==null || newNode.value.compareTo(remove.left.value) != 0) newNode.left = remove.left;
+
+            newNode.right = remove.right;
+            parentNode(remove, newNode);
+
+        } else if (remove.right != null) {
             newNode = first(remove.right);
-            remove(remove, newNode, newNode.right);
-        }
-        else parentNode(remove, null);
+
+            parentNode(newNode, newNode.right);
+
+            if (newNode.right != null) newNode.right.parent = newNode.parent;
+
+            newNode.parent = remove.parent;
+            newNode.left = remove.left;
+
+            if (newNode.right==null || newNode.value.compareTo(remove.right.value) != 0) newNode.right = remove.right;
+
+            parentNode(remove, newNode);
+        } else parentNode(remove, null);
         size--;
         return true;
     }
 
     private void remove(Node<T> remove, Node<T> newNode, Node<T> n) {
         parentNode(newNode, n);
-        if (n!=null) n.parent = newNode.parent;
+        if (n != null) n.parent = newNode.parent;
         newNode.parent = remove.parent;
         newNode.left = remove.left;
         newNode.right = remove.right;
@@ -147,6 +170,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Проверка наличия следующего элемента
          * Средняя
          */
+//////////////////////////////////////
+// Временнная сложность O(1)        //
+// Сложность по памяти O(1)         //
+//////////////////////////////////////
         @Override
         public boolean hasNext() {
             return !stack.empty() || current != null;
@@ -156,6 +183,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Поиск следующего элемента
          * Средняя
          */
+//////////////////////////////////////
+// Временнная сложность O(1)        //
+// Сложность по памяти O(n)         //
+//////////////////////////////////////
         @Override
         public T next() {
             while (hasNext()) {
@@ -176,6 +207,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Удаление следующего элемента
          * Сложная
          */
+//////////////////////////////////////
+// Временнная сложность O(n)        //
+// Сложность по памяти O(n)         //
+//////////////////////////////////////
         @Override
         public void remove() {
             Integer prev = previous - 1;
@@ -216,7 +251,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         Node<T> parent = remove.parent;
         if (parent == null) root = val;
         else {
-            if (parent.right != null && parent.right.value.compareTo(remove.value)==0) parent.right = val;
+            if (parent.right != null && parent.right.value.compareTo(remove.value) == 0) parent.right = val;
             else parent.left = val;
         }
     }
@@ -261,6 +296,12 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * Для этой задачи нет тестов (есть только заготовка subSetTest), но её тоже можно решить и их написать
      * Очень сложная
      */
+//////////////////////////////////////
+// Временнная сложность равна сл-ти //
+// соответсвующих ф-ций BinaryTree  //
+// Кроме size() O(n)                //
+// Сложность по памяти O(n)         //
+//////////////////////////////////////
     @NotNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
@@ -274,7 +315,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        return new SubSet<T>(this, null, toElement);
+        return new SubSet<>(this, null, toElement);
     }
 
     /**
@@ -284,7 +325,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
-        return new SubSet<T>(this, fromElement, null);
+        return new SubSet<>(this, fromElement, null);
     }
 
     @Override

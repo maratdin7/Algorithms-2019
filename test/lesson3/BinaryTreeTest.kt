@@ -1,6 +1,7 @@
 package lesson3
 
 import org.junit.jupiter.api.Tag
+import ru.spbstu.ktuples.Tuple0.size
 import java.util.*
 import kotlin.NoSuchElementException
 import kotlin.test.*
@@ -92,6 +93,20 @@ class BinaryTreeTest {
     @Tag("Normal")
     fun testRemoveJava() {
         testRemove { createJavaTree() }
+
+        val tree = BinaryTree<Int>()
+        val r = Random()
+        val randomSize = r.nextInt(5)
+        while (tree.size < randomSize) {
+            tree.add(r.nextInt(100000))
+        }
+        var lastSize = 1001
+        while (tree.root != null) {
+            if (lastSize == size) println(tree)
+            lastSize = tree.size
+            tree.remove(tree.root.value)
+        }
+        assertTrue(tree.size == 0)
     }
 
     private fun testIterator(create: () -> CheckableSortedSet<Int>) {
