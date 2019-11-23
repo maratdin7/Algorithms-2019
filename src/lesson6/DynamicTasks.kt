@@ -30,9 +30,40 @@ fun longestCommonSubSequence(first: String, second: String): String {
  * то вернуть ту, в которой числа расположены раньше (приоритет имеют первые числа).
  * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
  */
+
+//////////////////////////////////////
+// Временнная сложность O(n^2)      //
+// Сложность по памяти O(n)         //
+//////////////////////////////////////
 fun longestIncreasingSubSequence(list: List<Int>): List<Int> {
-    TODO()
+    data class Node(var index: Int, var size: Int)
+
+    val maxNodes = mutableListOf<Node>()
+    for ((i, value) in list.withIndex()) {
+        var maxNode = Node(i, 0)
+
+        for (j in 0 until i)
+            if (list[j] < value && maxNode.size < maxNodes[j].size)
+                maxNode = Node(j, maxNodes[j].size)
+        maxNode.size++
+        maxNodes.add(maxNode)
+    }
+    var last = 0
+    var current = maxNodes.firstOrNull() ?: return listOf()
+    for ((i, node) in maxNodes.withIndex()) {
+        if (current.size < node.size) {
+            last = i
+            current = node
+        }
+    }
+    val ans = mutableListOf(list[last])
+    while (current.size - 1 != 0) {
+        ans.add(list[current.index])
+        current = maxNodes[current.index]
+    }
+    return ans.asReversed()
 }
+
 
 /**
  * Самый короткий маршрут на прямоугольном поле.
