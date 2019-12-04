@@ -1,9 +1,9 @@
 package lesson5;
 
 import kotlin.NotImplementedError;
+import kotlin.Pair;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaGraphTasks {
@@ -98,7 +98,6 @@ public class JavaGraphTasks {
     public static Set<Graph.Vertex> largestIndependentVertexSet(Graph graph) {
         throw new NotImplementedError();
     }
-
     /**
      * Наидлиннейший простой путь.
      * Сложная

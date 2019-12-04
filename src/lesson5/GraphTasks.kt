@@ -2,6 +2,8 @@
 
 package lesson5
 
+import java.util.*
+
 /**
  * Эйлеров цикл.
  * Средняя
@@ -90,9 +92,44 @@ fun Graph.minimumSpanningTree(): Graph {
  *
  * Эта задача может быть зачтена за пятый и шестой урок одновременно
  */
-fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
-    TODO()
+fun Graph.largestIndependentVertexSet(): Int {//Set<Graph.Vertex> {
+    val vertices: Set<Graph.Vertex> = vertices
+
+    class GraphDfs {
+        //private Set<Graph.Vertex> visited = new HashSet<>();
+        private val size = vertices.size
+        private val visited: MutableMap<Graph.Vertex, Sum> = HashMap()
+
+        fun doDfs(): Int {//Set<Graph.Vertex> {
+            var sum: Sum
+            var max = 0
+            for (vertex in vertices) {
+                if (!visited.containsKey(vertex)) {
+                    sum = dfs(vertex)
+                    if (maxOf(sum.parentAdd, sum.parentNotAdd) > max) max = maxOf(sum.parentAdd, sum.parentNotAdd)
+                }
+            }
+            return max
+        }
+
+        private fun dfs(vertex: Graph.Vertex): Sum {
+            visited[vertex] = Sum(0, 1)
+            for (v in getNeighbors(vertex)) {
+                if (!visited.containsKey(v)) {
+                    val s = dfs(v)
+                    visited[vertex]!!.parentNotAdd += s.parentAdd
+                    visited[vertex]!!.parentAdd += maxOf(s.parentAdd, s.parentNotAdd)
+                }
+            }
+            return visited[vertex]!!
+        }
+    }
+
+    val graphDfs = GraphDfs()
+    return graphDfs.doDfs()
 }
+
+data class Sum(var parentAdd: Int, var parentNotAdd: Int)
 
 /**
  * Наидлиннейший простой путь.
