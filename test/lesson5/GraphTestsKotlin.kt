@@ -64,7 +64,7 @@ class GraphTestsKotlin : AbstractGraphTests() {
             addConnection(c, d)
             addConnection(b, d)
         }.build()
-        assertFailsWith<IllegalArgumentException> { graphWithCycle.largestIndependentVertexSet()}
+        assertFailsWith<IllegalArgumentException> { graphWithCycle.largestIndependentVertexSet() }
     }
 
     @Test

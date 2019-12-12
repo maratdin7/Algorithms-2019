@@ -35,4 +35,5 @@ class DynamicTestsKotlin : AbstractDynamicTests() {
     fun testShortestPathOnField() {
         shortestPathOnField { shortestPathOnField(it) }
     }
+
 }
